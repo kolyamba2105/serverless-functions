@@ -1,0 +1,55 @@
+org: kolyamba2105
+service:
+  name: serverless-functions
+
+app: serverless-test
+
+custom:
+  webpack:
+    webpackConfig: ./webpack.config.js
+    includeModules: true
+
+plugins:
+  - serverless-webpack
+  - serverless-offline
+
+provider:
+  name: aws
+  runtime: nodejs10.x
+  apiGateway:
+    minimumCompressionSize: 1024
+  environment:
+    AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
+    MONGO_USER:
+      ${env:MONGO_USER, file(./env.yml):MONGO_USER}
+    MONGO_PASSWORD:
+      ${env:MONGO_PASSWORD, file(./env.yml):MONGO_PASSWORD}
+
+functions:
+  getUsers:
+    handler: src/users/GetUsersHandler.handle
+    events:
+      - http:
+          method: get
+          path: users
+
+  getUser:
+    handler: src/users/GetUserHandler.handle
+    events:
+      - http:
+          method: get
+          path: users/{id}
+
+  deleteUser:
+    handler: src/users/DeleteUserHandler.handle
+    events:
+      - http:
+          method: delete
+          path: users/{id}
+
+  createUser:
+    handler: src/users/CreateUserHandler.handle
+    events:
+      - http:
+          method: post
+          path: users
