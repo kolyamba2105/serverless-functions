@@ -1,8 +1,5 @@
-org: kolyamba2105
 service:
   name: serverless-functions
-
-app: serverless-test
 
 custom:
   webpack:
