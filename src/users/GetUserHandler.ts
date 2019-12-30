@@ -1,16 +1,31 @@
 import { APIGatewayEvent, APIGatewayProxyHandler } from 'aws-lambda'
 import { connectToMongo } from 'mongo-connect'
-import User, { UserFields } from 'users/User'
-import { createResponse, CustomError, StatusCodes } from 'utils'
+import { DocumentQuery } from 'mongoose'
+import User, { UserFields, UserModel } from 'users/User'
+import { createResponse, CustomError, isIdValid, StatusCodes } from 'utils'
 
-export const handle: APIGatewayProxyHandler = (event: APIGatewayEvent) => {
-  connectToMongo()
+export const handle: APIGatewayProxyHandler = ({ pathParameters: { id } }: APIGatewayEvent) => {
+  const getUser = () => new Promise((
+    resolve: (documentQuery: DocumentQuery<UserFields, UserModel>) => void,
+    reject: (error: CustomError) => void,
+  ) => {
+    if (isIdValid(id)) {
+      resolve(User.findById(id))
+    } else {
+      reject({ message: 'Invalid id!' })
+    }
+  })
 
-  const { pathParameters: { id } } = event
+  const onFulfilled = (user: UserFields | null) => user
+    ? createResponse<UserFields>(StatusCodes.OK)(user)
+    : createResponse<CustomError>(StatusCodes.NotFound)({ message: 'User not found!' })
 
-  return User.findById(id)
-    .then((user: UserFields | null) => user
-      ? createResponse<UserFields>(StatusCodes.OK)(user)
-      : createResponse<CustomError>(StatusCodes.NotFound)({ message: 'User not found!' }))
-    .catch(createResponse<Error>(StatusCodes.InternalServerError))
+  const onRejected = ({ message }: CustomError) => createResponse<CustomError>(StatusCodes.BadRequest)({ message })
+
+  const onHandlerError = ({ message }: Error) => createResponse<CustomError>(StatusCodes.InternalServerError)({ message })
+
+  return connectToMongo()
+    .then(getUser)
+    .then(onFulfilled, onRejected)
+    .catch(onHandlerError)
 }

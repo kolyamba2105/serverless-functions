@@ -1,6 +1,6 @@
 {
   "author": "Mykola Haravetskyy",
-  "name": "serverless-function",
+  "name": "serverless-functions",
   "version": "1.0.0",
   "description": "Serverless functions with Typescript",
   "main": "handler.js",

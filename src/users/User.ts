@@ -35,11 +35,11 @@ export type UserFields = {
   dateOfBirth: Date,
 }
 
-type UserModel = Document & UserFields
-
 export type UserDemo = Pick<UserFields, 'firstName' | 'lastName'>
 
 export const demoUser = ({ firstName, lastName }: UserFields): UserDemo => ({ firstName, lastName })
+
+export type UserModel = Document & UserFields
 
 // TODO: fix it somehow, it's not supposed to work like this :)
 export default models && models.User
