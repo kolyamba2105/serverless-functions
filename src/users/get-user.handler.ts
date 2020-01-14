@@ -1,23 +1,23 @@
 import { APIGatewayEvent, APIGatewayProxyHandler } from 'aws-lambda'
-import { connectToMongo } from 'mongo-connect'
+import { connectionError, connectToMongo } from 'mongo-connect'
 import { DocumentQuery } from 'mongoose'
-import User, { demoUser, UserDemo, UserFields, UserModel } from 'users/User'
+import User, { UserFields, UserModel } from 'users/user'
 import { createResponse, CustomError, isIdValid, StatusCodes } from 'utils'
 
 export const handle: APIGatewayProxyHandler = ({ pathParameters: { id } }: APIGatewayEvent) => {
-  const deleteUser = () => new Promise((
+  const getUser = () => new Promise((
     resolve: (documentQuery: DocumentQuery<UserFields, UserModel>) => void,
     reject: (error: CustomError) => void,
   ) => {
     if (isIdValid(id)) {
-      resolve(User.findByIdAndDelete(id))
+      resolve(User.findById(id))
     } else {
-      reject({ message: 'Invalid Id!' })
+      reject({ message: 'Invalid id!' })
     }
   })
 
   const onFulfilled = (user: UserFields | null) => user
-    ? createResponse<UserDemo>(StatusCodes.OK)(demoUser(user))
+    ? createResponse<UserFields>(StatusCodes.OK)(user)
     : createResponse<CustomError>(StatusCodes.NotFound)({ message: 'User not found!' })
 
   const onRejected = ({ message }: CustomError) => createResponse<CustomError>(StatusCodes.BadRequest)({ message })
@@ -25,7 +25,7 @@ export const handle: APIGatewayProxyHandler = ({ pathParameters: { id } }: APIGa
   const onHandlerError = ({ message }: Error) => createResponse<CustomError>(StatusCodes.InternalServerError)({ message })
 
   return connectToMongo()
-    .then(deleteUser)
+    .then(getUser, connectionError)
     .then(onFulfilled, onRejected)
     .catch(onHandlerError)
 }

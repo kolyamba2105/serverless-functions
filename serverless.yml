@@ -24,28 +24,28 @@ provider:
 
 functions:
   getUsers:
-    handler: src/users/GetUsersHandler.handle
+    handler: src/users/get-users.handler.handle
     events:
       - http:
           method: get
           path: users
 
   getUser:
-    handler: src/users/GetUserHandler.handle
+    handler: src/users/get-user.handler.handle
     events:
       - http:
           method: get
           path: users/{id}
 
   deleteUser:
-    handler: src/users/DeleteUserHandler.handle
+    handler: src/users/delete-user.handler.handle
     events:
       - http:
           method: delete
           path: users/{id}
 
   createUser:
-    handler: src/users/CreateUserHandler.handle
+    handler: src/users/create-user.handler.handle
     events:
       - http:
           method: post

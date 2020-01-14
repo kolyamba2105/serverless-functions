@@ -27,6 +27,13 @@ const UserSchema = new Schema({
   },
 });
 
+UserSchema
+  .path('email')
+  .validate(
+    async (email: string) => !await models.User.countDocuments({ email: email }),
+    'E-mail is already in use!',
+  );
+
 export type UserFields = {
   firstName: string,
   lastName: string,
