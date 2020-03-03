@@ -1,31 +1,31 @@
 import { APIGatewayEvent, APIGatewayProxyHandler } from 'aws-lambda'
-import { connectionError, connectToMongo } from 'mongo-connect'
-import { DocumentQuery } from 'mongoose'
-import User, { UserFields, UserModel } from 'users/user'
-import { createResponse, CustomError, isIdValid, StatusCodes } from 'utils'
+import { isSome, none, Option, some } from 'fp-ts/lib/Option'
+import { pipe } from 'fp-ts/lib/pipeable'
+import { map as mapTask, of, Task } from 'fp-ts/lib/Task'
+import { chain, fold, fromEither, map, mapLeft, TaskEither } from 'fp-ts/lib/TaskEither'
+import { identity } from 'io-ts'
+import { connectToMongo } from 'mongo-connect'
+import UserRepository, { User } from 'users/user'
+import { createResponse, CustomError, isObjectIdValid, StatusCodes } from 'utils'
 
 export const handle: APIGatewayProxyHandler = ({ pathParameters: { id } }: APIGatewayEvent) => {
-  const getUser = () => new Promise((
-    resolve: (documentQuery: DocumentQuery<UserFields, UserModel>) => void,
-    reject: (error: CustomError) => void,
-  ) => {
-    if (isIdValid(id)) {
-      resolve(User.findById(id))
-    } else {
-      reject({ message: 'Invalid id!' })
-    }
-  })
+  const validateId = (): TaskEither<CustomError, string> => fromEither(isObjectIdValid(id))
 
-  const onFulfilled = (user: UserFields | null) => user
-    ? createResponse<UserFields>(StatusCodes.OK)(user)
-    : createResponse<CustomError>(StatusCodes.NotFound)({ message: 'User not found!' })
+  const getUser = (id: string): Task<User> => () => UserRepository.findById(id).exec()
 
-  const onRejected = ({ message }: CustomError) => createResponse<CustomError>(StatusCodes.BadRequest)({ message })
+  const toResponse = (result: User) => {
+    const user: Option<User> = result !== null ? some(result) : none
 
-  const onHandlerError = ({ message }: Error) => createResponse<CustomError>(StatusCodes.InternalServerError)({ message })
+    return isSome(user)
+      ? createResponse<User>(StatusCodes.OK)(user.value)
+      : createResponse<CustomError>(StatusCodes.NotFound)({ message: 'User not found!' })
+  }
 
-  return connectToMongo()
-    .then(getUser, connectionError)
-    .then(onFulfilled, onRejected)
-    .catch(onHandlerError)
+  return pipe(
+    chain(validateId)(connectToMongo),
+    map(getUser),
+    map(mapTask(toResponse)),
+    mapLeft(createResponse(StatusCodes.BadRequest)),
+    fold(of, identity),
+  )()
 }

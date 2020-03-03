@@ -25,16 +25,16 @@ const UserSchema = new Schema({
     type: Date,
     required: [true, 'Date of Birth is required!'],
   },
-});
+})
 
 UserSchema
   .path('email')
   .validate(
     async (email: string) => !await models.User.countDocuments({ email: email }),
     'E-mail is already in use!',
-  );
+  )
 
-export type UserFields = {
+export type User = {
   firstName: string,
   lastName: string,
   email: string,
@@ -42,11 +42,11 @@ export type UserFields = {
   dateOfBirth: Date,
 }
 
-export type UserDemo = Pick<UserFields, 'firstName' | 'lastName'>
+export type UserDemo = Pick<User, 'firstName' | 'lastName'>
 
-export const demoUser = ({ firstName, lastName }: UserFields): UserDemo => ({ firstName, lastName })
+export const demoUser = ({ firstName, lastName }: User): UserDemo => ({ firstName, lastName })
 
-export type UserModel = Document & UserFields
+export type UserModel = Document & User
 
 // TODO: fix it somehow, it's not supposed to work like this :)
 export default models && models.User

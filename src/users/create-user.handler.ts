@@ -1,33 +1,34 @@
 import { APIGatewayEvent, APIGatewayProxyHandler } from 'aws-lambda'
-import { connectionError, connectToMongo } from 'mongo-connect'
-import User, { demoUser, UserDemo, UserFields } from 'users/user'
-import { createResponse, CustomError, StatusCodes } from 'utils'
+import { Either, left, right } from 'fp-ts/lib/Either'
+import { isSome, none, Option, some } from 'fp-ts/lib/Option'
+import { pipe } from 'fp-ts/lib/pipeable'
+import { of } from 'fp-ts/lib/Task'
+import { chain, fold, fromEither, map, mapLeft, TaskEither, tryCatch } from 'fp-ts/lib/TaskEither'
+import { connectToMongo } from 'mongo-connect'
+import UserRepository, { User } from 'users/user'
+import { createResponse, CustomError, onRejected, StatusCodes } from 'utils'
 
 export const handle: APIGatewayProxyHandler = ({ body }: APIGatewayEvent) => {
-  const createUser = () => {
-    if (body) {
-      const { firstName, lastName, email, occupation, dateOfBirth } = JSON.parse(body) as UserFields
+  const validateBody = (body: string | null): Either<CustomError, User> => {
+    const option: Option<string> = body ? some(body) : none
 
-      const user = new User({
-        firstName,
-        lastName,
-        email,
-        occupation,
-        dateOfBirth,
-      })
-
-      return user.save()
-    }
+    return isSome(option)
+      // TODO add validation while parsing
+      ? right(JSON.parse(body) as User)
+      : left({ message: 'Body is not provided!' })
   }
 
-  const onFulfilled = (user: UserFields) => createResponse<UserDemo>(StatusCodes.Created)(demoUser(user))
+  const validateBodyTask = (): TaskEither<CustomError, User> => fromEither(validateBody(body))
 
-  const onRejected = ({ message }: Error) => createResponse<CustomError>(StatusCodes.BadRequest)({ message })
+  const createUser = (user: User) => () => new UserRepository(user).save()
 
-  const onHandlerError = ({ message }: Error) => createResponse<CustomError>(StatusCodes.InternalServerError)({ message })
+  const createUserTask = (user: User): TaskEither<CustomError, User> => tryCatch(createUser(user), onRejected)
 
-  return connectToMongo()
-    .then(createUser, connectionError)
-    .then(onFulfilled, onRejected)
-    .catch(onHandlerError)
+  return pipe(
+    chain(validateBodyTask)(connectToMongo),
+    chain(createUserTask),
+    map(createResponse<User>(StatusCodes.Created)),
+    mapLeft(createResponse(StatusCodes.BadRequest)),
+    fold(of, of),
+  )()
 }

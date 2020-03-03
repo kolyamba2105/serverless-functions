@@ -1,12 +1,14 @@
 import credentials from 'credentials'
-import { connect } from 'mongoose'
-import { createResponse, CustomError, StatusCodes } from 'utils'
+import { Task } from 'fp-ts/lib/Task'
+import { TaskEither, tryCatch } from 'fp-ts/lib/TaskEither'
+import { connect, Mongoose } from 'mongoose'
+import { CustomError, onRejected } from 'utils'
 
-export const connectToMongo = () => {
-  const { mongoUser: user, mongoPassword: pass } = credentials
+export const establishConnection: Task<Mongoose> = () => {
+  const { mongo: { uri, user: user, password: pass } } = credentials
 
   return connect(
-    `mongodb://ds155825.mlab.com:55825/serverless-database`,
+    uri,
     {
       user,
       pass,
@@ -17,4 +19,4 @@ export const connectToMongo = () => {
   )
 }
 
-export const connectionError = ({ message }: Error) => createResponse<CustomError>(StatusCodes.InternalServerError)({ message })
+export const connectToMongo: TaskEither<CustomError, Mongoose> = tryCatch(establishConnection, onRejected)

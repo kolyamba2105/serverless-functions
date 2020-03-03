@@ -1,14 +1,13 @@
 import { APIGatewayProxyHandler } from 'aws-lambda'
-import { connectToMongo } from 'mongo-connect'
-import { DocumentQuery } from 'mongoose'
-import Users, { UserFields, UserModel } from 'users/user'
+import { pipe } from 'fp-ts/lib/pipeable'
+import { chain, map, Task } from 'fp-ts/lib/Task'
+import { establishConnection } from 'mongo-connect'
+import UserRepository, { User } from 'users/user'
 import { createResponse, StatusCodes } from 'utils'
 
-export const handle: APIGatewayProxyHandler = () => {
-  const getUsers = () => Users.find() as DocumentQuery<ReadonlyArray<UserModel>, UserModel>
+const getUsers = (): Task<ReadonlyArray<User>> => () => UserRepository.find().exec()
 
-  return connectToMongo()
-    .then(getUsers)
-    .then(createResponse<ReadonlyArray<UserFields>>(StatusCodes.OK))
-    .catch(createResponse<Error>(StatusCodes.InternalServerError))
-}
+export const handle: APIGatewayProxyHandler = () => pipe(
+  chain(getUsers)(establishConnection),
+  map(createResponse<ReadonlyArray<User>>(StatusCodes.OK)),
+)()
