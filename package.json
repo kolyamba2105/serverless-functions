@@ -5,8 +5,9 @@
   "description": "Serverless functions with Typescript",
   "main": "handler.js",
   "scripts": {
-    "start:dev": "sls offline start",
-    "deploy": "sls deploy"
+    "start": "sls offline start",
+    "deploy:dev": "sls deploy",
+    "deploy:test": "sls deploy --stage test"
   },
   "dependencies": {
     "fp-ts": "2.5.3",
