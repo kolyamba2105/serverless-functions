@@ -34,19 +34,39 @@ UserSchema
     'E-mail is already in use!',
   )
 
-export type User = {
+export type UserObject = {
+  id: string,
   firstName: string,
   lastName: string,
   email: string,
   occupation: string,
   dateOfBirth: Date,
+  __v: number,
 }
 
-export type UserDemo = Pick<User, 'firstName' | 'lastName'>
+export type User = Omit<UserObject, '__v'>
 
-export const demoUser = ({ firstName, lastName }: User): UserDemo => ({ firstName, lastName })
+export const userObjectToUser = (
+  {
+    id,
+    firstName,
+    lastName,
+    email,
+    occupation,
+    dateOfBirth,
+  }: UserObject
+): User => ({
+  id,
+  firstName,
+  lastName,
+  email,
+  occupation,
+  dateOfBirth,
+})
 
-export type UserModel = Document & User
+export type UserDto = Omit<User, 'id'>
+
+export type UserModel = Document & UserDto
 
 // TODO: fix it somehow, it's not supposed to work like this :)
 export default models && models.User

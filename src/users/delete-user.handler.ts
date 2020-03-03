@@ -1,5 +1,5 @@
 import { APIGatewayEvent, APIGatewayProxyHandler } from 'aws-lambda'
-import { isSome, none, some } from 'fp-ts/lib/Option'
+import { isSome, none, Option, some } from 'fp-ts/lib/Option'
 import { pipe } from 'fp-ts/lib/pipeable'
 import { map as mapTask, of, Task } from 'fp-ts/lib/Task'
 import { chain, fold, fromEither, map, mapLeft, TaskEither } from 'fp-ts/lib/TaskEither'
@@ -14,7 +14,7 @@ export const handle: APIGatewayProxyHandler = ({ pathParameters: { id } }: APIGa
   const deleteUser = (id: string): Task<User> => () => UserRepository.findByIdAndDelete(id).exec()
 
   const toResponse = (result: User) => {
-    const user = result !== null ? some(result) : none
+    const user: Option<User> = result !== null ? some(result) : none
 
     return isSome(user)
       ? createResponse<null>(StatusCodes.NoContent)(null)

@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "fp-ts": "2.5.3",
+    "immutable": "4.0.0-rc.12",
     "io-ts": "2.1.2",
     "mongoose": "5.9.2",
     "source-map-support": "0.5.10"

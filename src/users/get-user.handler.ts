@@ -5,19 +5,19 @@ import { map as mapTask, of, Task } from 'fp-ts/lib/Task'
 import { chain, fold, fromEither, map, mapLeft, TaskEither } from 'fp-ts/lib/TaskEither'
 import { identity } from 'io-ts'
 import { connectToMongo } from 'mongo-connect'
-import UserRepository, { User } from 'users/user'
+import UserRepository, { User, UserObject, userObjectToUser } from 'users/user'
 import { createResponse, CustomError, isObjectIdValid, StatusCodes } from 'utils'
 
 export const handle: APIGatewayProxyHandler = ({ pathParameters: { id } }: APIGatewayEvent) => {
   const validateId = (): TaskEither<CustomError, string> => fromEither(isObjectIdValid(id))
 
-  const getUser = (id: string): Task<User> => () => UserRepository.findById(id).exec()
+  const getUser = (id: string): Task<UserObject> => () => UserRepository.findById(id).exec()
 
-  const toResponse = (result: User) => {
-    const user: Option<User> = result !== null ? some(result) : none
+  const toResponse = (result: UserObject) => {
+    const user: Option<UserObject> = result !== null ? some(result) : none
 
     return isSome(user)
-      ? createResponse<User>(StatusCodes.OK)(user.value)
+      ? createResponse<User>(StatusCodes.OK)(userObjectToUser(user.value))
       : createResponse<CustomError>(StatusCodes.NotFound)({ message: 'User not found!' })
   }
 
