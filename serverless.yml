@@ -1,7 +1,7 @@
 org: kolyamba2105
-app: sls-fp-ts
+app: sls-fp-api
 service:
-  name: serverless-functions
+  name: sls-api
 
 custom:
   webpack:
