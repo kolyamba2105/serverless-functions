@@ -1,3 +1,5 @@
+org: kolyamba2105
+app: sls-fp-ts
 service:
   name: serverless-functions
 
