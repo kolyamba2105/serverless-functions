@@ -1,19 +1,29 @@
 import { APIGatewayProxyHandler } from 'aws-lambda'
 import { pipe } from 'fp-ts/lib/pipeable'
-import { chain, map, Task } from 'fp-ts/lib/Task'
+import * as A from 'fp-ts/lib/ReadonlyArray'
+import * as T from 'fp-ts/lib/Task'
+import * as TE from 'fp-ts/lib/TaskEither'
 import { Map } from 'immutable'
-import { establishConnection } from 'mongo-connect'
-import UserRepository, { User, UserObject, userObjectToUser } from 'users/user'
-import { createResponse, StatusCodes } from 'utils'
+import { connectToMongo } from 'mongo-connect'
+import { Mongoose } from 'mongoose'
+import { User, UserObject, userObjectToUser } from 'users/user'
+import { find } from 'users/user.repository'
+import { createResponse, CustomError, StatusCodes } from 'utils'
 
 export const handle: APIGatewayProxyHandler = () => {
-  const getUsers = (): Task<ReadonlyArray<UserObject>> => () => UserRepository.find().exec()
-
-  const toUsersMap = (users: ReadonlyArray<UserObject>) => Map<string, User>(users.map((user: UserObject) => [user.id, userObjectToUser(user)]))
+  const toUsersMap = (
+    users: ReadonlyArray<UserObject>
+  ) => Map<string, User>(
+    A.map((user: UserObject): [string, User] => [user.id, userObjectToUser(user)])(users)
+  )
 
   return pipe(
-    chain(getUsers)(establishConnection),
-    map(toUsersMap),
-    map(createResponse<Map<string, User>>(StatusCodes.OK)),
+    connectToMongo,
+    TE.map<Mongoose, T.Task<ReadonlyArray<UserObject>>>(find),
+    TE.chain(TE.rightTask),
+    TE.map(toUsersMap),
+    TE.map(createResponse<Map<string, User>>(StatusCodes.OK)),
+    TE.mapLeft(createResponse<CustomError>(StatusCodes.InternalServerError)),
+    TE.fold(T.of, T.of)
   )()
 }

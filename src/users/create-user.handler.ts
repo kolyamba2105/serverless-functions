@@ -1,35 +1,29 @@
-import { APIGatewayEvent, APIGatewayProxyHandler } from 'aws-lambda'
-import { Either, left, right } from 'fp-ts/lib/Either'
-import { isSome, none, Option, some } from 'fp-ts/lib/Option'
+import { APIGatewayEvent, APIGatewayProxyHandler, APIGatewayProxyResult } from 'aws-lambda'
+import * as E from 'fp-ts/lib/Either'
 import { pipe } from 'fp-ts/lib/pipeable'
-import { of } from 'fp-ts/lib/Task'
-import { chain, fold, fromEither, map, mapLeft, TaskEither, tryCatch } from 'fp-ts/lib/TaskEither'
+import * as T from 'fp-ts/lib/Task'
+import * as TE from 'fp-ts/lib/TaskEither'
 import { connectToMongo } from 'mongo-connect'
-import UserRepository, { User, UserDto, userObjectToUser } from 'users/user'
-import { createResponse, CustomError, onRejected, StatusCodes } from 'utils'
+import { Mongoose } from 'mongoose'
+import { User, UserDto, UserObject, userObjectToUser } from 'users/user'
+import { save } from 'users/user.repository'
+import { createResponse, CustomError, StatusCodes } from 'utils'
 
 export const handle: APIGatewayProxyHandler = ({ body }: APIGatewayEvent) => {
-  const validateBody = (body: string | null): Either<CustomError, UserDto> => {
-    const option: Option<string> = body ? some(body) : none
-
-    return isSome(option)
-      // TODO add validation while parsing
-      ? right(JSON.parse(body) as UserDto)
-      : left({ message: 'Body is not provided!' })
-  }
-
-  const validateBodyTask = (): TaskEither<CustomError, UserDto> => fromEither(validateBody(body))
-
-  const createUser = (user: UserDto) => () => new UserRepository(user).save()
-
-  const createUserTask = (user: UserDto): TaskEither<CustomError, UserDto> => tryCatch(createUser(user), onRejected)
+  const validateBody = (): TE.TaskEither<CustomError, UserDto> => pipe(
+    body,
+    E.fromNullable<CustomError>({ message: 'Body is not provided!' }),
+    E.map<string, UserDto>(JSON.parse),
+    // TODO add body validation here!
+    TE.fromEither,
+  )
 
   return pipe(
-    chain(validateBodyTask)(connectToMongo),
-    chain(createUserTask),
-    map(userObjectToUser),
-    map(createResponse<User>(StatusCodes.Created)),
-    mapLeft(createResponse(StatusCodes.BadRequest)),
-    fold(of, of),
+    TE.chain<CustomError, Mongoose, UserDto>(validateBody)(connectToMongo),
+    TE.chain<CustomError, UserDto, UserObject>(save),
+    TE.map<UserObject, User>(userObjectToUser),
+    TE.map<User, APIGatewayProxyResult>(createResponse<User>(StatusCodes.Created)),
+    TE.mapLeft<CustomError, APIGatewayProxyResult>(createResponse(StatusCodes.BadRequest)),
+    TE.fold(T.of, T.of),
   )()
 }

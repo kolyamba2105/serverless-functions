@@ -1,31 +1,31 @@
-import { APIGatewayEvent, APIGatewayProxyHandler } from 'aws-lambda'
-import { isSome, none, Option, some } from 'fp-ts/lib/Option'
+import { APIGatewayEvent, APIGatewayProxyHandler, APIGatewayProxyResult } from 'aws-lambda'
+import * as O from 'fp-ts/lib/Option'
 import { pipe } from 'fp-ts/lib/pipeable'
-import { map as mapTask, of, Task } from 'fp-ts/lib/Task'
-import { chain, fold, fromEither, map, mapLeft, TaskEither } from 'fp-ts/lib/TaskEither'
-import { identity } from 'io-ts'
+import * as T from 'fp-ts/lib/Task'
+import * as TE from 'fp-ts/lib/TaskEither'
 import { connectToMongo } from 'mongo-connect'
-import UserRepository, { User } from 'users/user'
+import { UserObject, userObjectToUser } from 'users/user'
+import { findByIdAndDelete } from 'users/user.repository'
 import { createResponse, CustomError, isObjectIdValid, StatusCodes } from 'utils'
 
 export const handle: APIGatewayProxyHandler = ({ pathParameters: { id } }: APIGatewayEvent) => {
-  const validateId = (): TaskEither<CustomError, string> => fromEither(isObjectIdValid(id))
+  const validateId = (): TE.TaskEither<CustomError, string> => TE.fromEither(isObjectIdValid(id))
 
-  const deleteUser = (id: string): Task<User> => () => UserRepository.findByIdAndDelete(id).exec()
-
-  const toResponse = (result: User) => {
-    const user: Option<User> = result !== null ? some(result) : none
-
-    return isSome(user)
-      ? createResponse<null>(StatusCodes.NoContent)(null)
-      : createResponse<CustomError>(StatusCodes.NotFound)({ message: 'User not found!' })
-  }
+  const toResponse = (result: O.Option<UserObject>) => pipe(
+    result,
+    O.map(userObjectToUser),
+    O.fold(
+      () => createResponse<CustomError>(StatusCodes.NotFound)({ message: 'User not found!' }),
+      createResponse<null>(StatusCodes.NoContent),
+    ),
+  )
 
   return pipe(
-    chain(validateId)(connectToMongo),
-    map(deleteUser),
-    map(mapTask(toResponse)),
-    mapLeft(createResponse(StatusCodes.BadRequest)),
-    fold(of, identity),
+    TE.chain<CustomError, unknown, string>(validateId)(connectToMongo),
+    TE.map<string, T.Task<O.Option<UserObject>>>(findByIdAndDelete),
+    TE.chain<CustomError, T.Task<O.Option<UserObject>>, O.Option<UserObject>>(TE.rightTask),
+    TE.map<O.Option<UserObject>, APIGatewayProxyResult>(toResponse),
+    TE.mapLeft<CustomError, APIGatewayProxyResult>(createResponse(StatusCodes.BadRequest)),
+    TE.fold(T.of, T.of)
   )()
 }
