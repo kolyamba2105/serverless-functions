@@ -6,23 +6,23 @@ import * as TE from 'fp-ts/lib/TaskEither'
 import { Map } from 'immutable'
 import { connectToMongo } from 'mongo-connect'
 import { Mongoose } from 'mongoose'
-import { User, UserObject, userObjectToUser } from 'users/user'
-import { find } from 'users/user.repository'
+import { UserModel, userModelToUserObject, UserObject } from 'users/user.model'
+import UserRepository from 'users/user.repository'
 import { createResponse, CustomError, StatusCodes } from 'utils'
 
 export const handle: APIGatewayProxyHandler = () => {
   const toUsersMap = (
-    users: ReadonlyArray<UserObject>
-  ) => Map<string, User>(
-    A.map((user: UserObject): [string, User] => [user.id, userObjectToUser(user)])(users)
+    users: ReadonlyArray<UserModel>
+  ) => Map<string, UserObject>(
+    A.map((user: UserModel): [string, UserObject] => [user.id, userModelToUserObject(user)])(users)
   )
 
   return pipe(
     connectToMongo,
-    TE.map<Mongoose, T.Task<ReadonlyArray<UserObject>>>(find),
+    TE.map<Mongoose, T.Task<ReadonlyArray<UserModel>>>(UserRepository.find),
     TE.chain(TE.rightTask),
     TE.map(toUsersMap),
-    TE.map(createResponse<Map<string, User>>(StatusCodes.OK)),
+    TE.map(createResponse<Map<string, UserObject>>(StatusCodes.OK)),
     TE.mapLeft(createResponse<CustomError>(StatusCodes.InternalServerError)),
     TE.fold(T.of, T.of)
   )()

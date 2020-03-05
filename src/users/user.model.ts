@@ -41,12 +41,13 @@ export type UserObject = {
   email: string,
   occupation: string,
   dateOfBirth: Date,
-  __v: number,
 }
 
-export type User = Omit<UserObject, '__v'>
+export type UserDto = Omit<UserObject, 'id'>
 
-export const userObjectToUser = (
+export type UserModel = Document & UserDto
+
+export const userModelToUserObject = (
   {
     id,
     firstName,
@@ -54,8 +55,8 @@ export const userObjectToUser = (
     email,
     occupation,
     dateOfBirth,
-  }: UserObject
-): User => ({
+  }: UserModel
+): UserObject => ({
   id,
   firstName,
   lastName,
@@ -64,11 +65,6 @@ export const userObjectToUser = (
   dateOfBirth,
 })
 
-export type UserDto = Omit<User, 'id'>
-
-export type UserModel = Document & UserDto
-
-// TODO: fix it somehow, it's not supposed to work like this :)
-export default models && models.User
+export const User = models && models.User
   ? models.User
   : model<UserModel>('User', UserSchema)

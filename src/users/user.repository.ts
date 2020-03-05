@@ -2,12 +2,13 @@ import { fromNullable, Option } from 'fp-ts/lib/Option'
 import { Task } from 'fp-ts/lib/Task'
 import { TaskEither, tryCatch } from 'fp-ts/lib/TaskEither'
 import { CustomError, onRejected } from 'utils'
-import User, { UserDto, UserObject } from './user'
+import { User, UserDto, UserModel } from 'users/user.model'
 
-export const find = (): Task<ReadonlyArray<UserObject>> => () => User.find().then()
+const UserRepository = {
+  find: (): Task<ReadonlyArray<UserModel>> => () => User.find().then(),
+  findById: (id: string): Task<Option<UserModel>> => () => User.findById(id).then(fromNullable),
+  save: (dto: UserDto): TaskEither<CustomError, UserModel> => tryCatch(() => new User(dto).save(), onRejected),
+  findByIdAndDelete: (id: string): Task<Option<UserModel>> => () => User.findByIdAndRemove(id).then(fromNullable),
+}
 
-export const findById = (id: string): Task<Option<UserObject>> => () => User.findById(id).then(fromNullable)
-
-export const save = (dto: UserDto): TaskEither<CustomError, UserObject> => tryCatch(() => new User(dto).save(), onRejected)
-
-export const findByIdAndDelete = (id: string): Task<Option<UserObject>> => () => User.findByIdAndRemove(id).then(fromNullable)
+export default UserRepository
