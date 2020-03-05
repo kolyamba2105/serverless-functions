@@ -2,7 +2,7 @@ import credentials from 'credentials'
 import { Task } from 'fp-ts/lib/Task'
 import { TaskEither, tryCatch } from 'fp-ts/lib/TaskEither'
 import { connect, Mongoose } from 'mongoose'
-import { CustomError, onRejected } from 'utils'
+import { CustomError, onError } from 'utils'
 
 export const establishConnection: Task<Mongoose> = () => {
   const { mongo: { uri, user: user, password: pass } } = credentials
@@ -19,4 +19,4 @@ export const establishConnection: Task<Mongoose> = () => {
   )
 }
 
-export const connectToMongo: TaskEither<CustomError, Mongoose> = tryCatch(establishConnection, onRejected)
+export const connectToMongo: TaskEither<CustomError, Mongoose> = tryCatch(establishConnection, onError)

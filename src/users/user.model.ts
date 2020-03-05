@@ -1,45 +1,33 @@
 import { Document, model, models, Schema } from 'mongoose'
 
 const UserSchema = new Schema({
-  firstName: {
+  name: {
     type: String,
-    required: [true, 'First Name is required!'],
-    trim: true,
-  },
-  lastName: {
-    type: String,
-    required: [true, 'Last Name is required!'],
+    required: true,
     trim: true,
   },
   email: {
     type: String,
-    required: [true, 'E-mail is required!'],
-    trim: true,
-  },
-  occupation: {
-    type: String,
-    required: [true, 'Occupation is required!'],
+    required: true,
     trim: true,
   },
   dateOfBirth: {
     type: Date,
-    required: [true, 'Date of Birth is required!'],
+    required: true,
   },
 })
 
 UserSchema
   .path('email')
   .validate(
-    async (email: string) => !await models.User.countDocuments({ email: email }),
+    async (email: string) => !await User.countDocuments({ email: email }),
     'E-mail is already in use!',
   )
 
 export type UserObject = {
   id: string,
-  firstName: string,
-  lastName: string,
+  name: string,
   email: string,
-  occupation: string,
   dateOfBirth: Date,
 }
 
@@ -50,18 +38,14 @@ export type UserModel = Document & UserDto
 export const userModelToUserObject = (
   {
     id,
-    firstName,
-    lastName,
+    name,
     email,
-    occupation,
     dateOfBirth,
   }: UserModel
 ): UserObject => ({
   id,
-  firstName,
-  lastName,
+  name,
   email,
-  occupation,
   dateOfBirth,
 })
 

@@ -26,4 +26,4 @@ export const createResponse = <T>(statusCode: StatusCodes) => (value: T): APIGat
   body: createBody<T>(value),
 })
 
-export const onRejected = ({ message }: Error): CustomError => ({ message })
+export const onError = ({ message }: Error): CustomError => ({ message })
