@@ -1,57 +1,105 @@
 import * as E from 'fp-ts/lib/Either'
 import { readFileSync } from 'fs'
-import * as t from 'io-ts'
 import { join } from 'path'
-import { User, UserValidationSchema } from './user.validation'
-
-const [
-  correctUser,
-  correctUserWithISODateString,
-  userWithInvalidDateOfBirth,
-  userWithNumberInsteadOfDate,
-  userWithStringInsteadOfDate,
-  userWithoutEmail,
-] = JSON.parse(readFileSync(join(__dirname, 'users.json')).toString())
+import { CustomError } from 'utils'
+import { DateOfBirth, validateDateOfBirth } from './date-of-birth.brand'
+import { validateEmail } from './e-mail.brand'
+import { validateName } from './name.brand'
+import { User, validateUser } from './user.validation'
 
 describe('User DTO validation', () => {
-  it('should properly decode user from JSON', () => {
-    const expectedUser: User = {
-      name: 'Foo',
-      email: 'foo@mail.com',
-      dateOfBirth: new Date('1998-04-04'),
-    }
-    const validation: E.Either<t.Errors, User> = UserValidationSchema.decode(correctUser)
+  describe('Email brand type', () => {
+    it('should properly decode an e-mail', () => {
+      const email: string = 'foo@bar.com'
+      const validationResult: E.Either<CustomError, string> = validateEmail(email)
 
-    expect(validation).toStrictEqual(E.right(expectedUser))
+      expect(E.isRight(validationResult)).toBeTruthy()
+    })
+
+    it('should not decode an invalid e-mail', () => {
+      const email: string = 'bla-bla-bla'
+      const validationResult: E.Either<CustomError, string> = validateEmail(email)
+
+      expect(E.isLeft(validationResult)).toBeTruthy()
+    })
   })
 
-  it('should properly decode user from JSON with DateISOString as date of birth', () => {
-    const validation: E.Either<t.Errors, User> = UserValidationSchema.decode(correctUserWithISODateString)
+  describe('Name brand type', () => {
+    it('should properly decode user name', () => {
+      const name: string = 'Foo'
+      const validationResult: E.Either<CustomError, string> = validateName(name)
 
-    expect(E.isRight(validation)).toBeTruthy()
+      expect(E.isRight(validationResult)).toBeTruthy()
+    })
+
+    it('should not decode user name when it does not contain at least one capital letter', () => {
+      const name: string = 'mike'
+      const validationResult: E.Either<CustomError, string> = validateName(name)
+
+      expect(E.isLeft(validationResult)).toBeTruthy()
+    })
+
+    it('should not decode user name when it is shorter then 3 chars', () => {
+      const name: string = 'CJ'
+      const validationResult: E.Either<CustomError, string> = validateName(name)
+
+      expect(E.isLeft(validationResult)).toBeTruthy()
+    })
   })
 
-  it('should not decode user from JSON with invalid date format', () => {
-    const validation: E.Either<t.Errors, User> = UserValidationSchema.decode(userWithInvalidDateOfBirth)
+  describe('DateOfBirth brand type', () => {
+    it('should properly decode date of birth', () => {
+      const dateOfBirth: string = '1998-04-04'
+      const validationResult: E.Either<CustomError, DateOfBirth> = validateDateOfBirth(dateOfBirth)
 
-    expect(E.isLeft(validation)).toBeTruthy()
+      expect(E.isRight(validationResult)).toBeTruthy()
+    })
+
+    it('should properly decode date of birth when it is a proper ISOString', () => {
+      const dateOfBirth: string = '1998-04-04T00:00:00.000Z'
+      const validationResult: E.Either<CustomError, DateOfBirth> = validateDateOfBirth(dateOfBirth)
+
+      expect(E.isRight(validationResult)).toBeTruthy()
+    })
+
+    it('should not decode date of birth when it is a random string', () => {
+      const dateOfBirth: string = 'bla-bla-bla'
+      const validationResult: E.Either<CustomError, DateOfBirth> = validateDateOfBirth(dateOfBirth)
+
+      expect(E.isLeft(validationResult)).toBeTruthy()
+    })
+
+    it('should not decode date of birth when it is a number', () => {
+      const dateOfBirth: number = 2000
+      const validationResult: E.Either<CustomError, DateOfBirth> = validateDateOfBirth(dateOfBirth)
+
+      expect(E.isLeft(validationResult)).toBeTruthy()
+    })
   })
 
-  it('should not decode user from JSON when user has NUMBER as a date of birth', () => {
-    const validation: E.Either<t.Errors, User> = UserValidationSchema.decode(userWithNumberInsteadOfDate)
+  describe('User DTO validation', () => {
+    const [
+      correctUser,
+      userWithIncorrectDate,
+      userWithMissingProperty,
+    ] = JSON.parse(readFileSync(join(__dirname, 'users.json')).toString())
 
-    expect(E.isLeft(validation)).toBeTruthy()
-  })
+    it('should properly decode user from JSON', () => {
+      const validationResult: E.Either<CustomError, User> = validateUser(correctUser)
 
-  it('should not decode user from JSON when user has STRING as a date of birth', () => {
-    const validation: E.Either<t.Errors, User> = UserValidationSchema.decode(userWithStringInsteadOfDate)
+      expect(E.isRight(validationResult)).toBeTruthy()
+    })
 
-    expect(E.isLeft(validation)).toBeTruthy()
-  })
+    it('should not decode user from JSON when date of birth is number', () => {
+      const validationResult: E.Either<CustomError, User> = validateUser(userWithIncorrectDate)
 
-  it('should not decode user from JSON when user is missing some properties', () => {
-    const validation: E.Either<t.Errors, User> = UserValidationSchema.decode(userWithoutEmail)
+      expect(E.isLeft(validationResult)).toBeTruthy()
+    })
 
-    expect(E.isLeft(validation)).toBeTruthy()
+    it('should not decode user from JSON when some props are missing', () => {
+      const validationResult: E.Either<CustomError, User> = validateUser(userWithMissingProperty)
+
+      expect(E.isLeft(validationResult)).toBeTruthy()
+    })
   })
 })
