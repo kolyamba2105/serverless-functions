@@ -24,11 +24,10 @@ const toUser = ([name, email, dateOfBirth]: [string, string, Date]): User => ({
   dateOfBirth,
 })
 
-const toFieldsValidationError = (errors: NEA.NonEmptyArray<CustomError>): CustomError => ({
-  message: NEA.map((e: CustomError) => e.message)(errors).join(' '),
+const toValidationError = (errors: NEA.NonEmptyArray<CustomError>): CustomError => ({
+  message: NEA.map((e: CustomError) => (e.message as string))(errors),
 })
 
-// TODO better error reporter
 export const validateUser = ({ name, email, dateOfBirth }: any): E.Either<CustomError, User> => pipe(
   sequenceT(applicativeValidation)(
     validateNameLifted(name),
@@ -36,5 +35,5 @@ export const validateUser = ({ name, email, dateOfBirth }: any): E.Either<Custom
     validateDateOfBirthLifted(dateOfBirth),
   ),
   E.map(toUser),
-  E.mapLeft(toFieldsValidationError),
+  E.mapLeft(toValidationError),
 )

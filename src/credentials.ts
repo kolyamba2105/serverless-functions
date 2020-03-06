@@ -1,3 +1,7 @@
+import { config } from 'dotenv'
+
+config()
+
 export default {
   mongo: {
     uri: process.env.MONGO_URI,

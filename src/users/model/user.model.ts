@@ -1,4 +1,3 @@
-import { Document } from 'mongoose'
 import { User as UserType } from 'users/validation'
 
 export type UserObject = {
@@ -8,17 +7,19 @@ export type UserObject = {
   dateOfBirth: Date,
 }
 
-export type UserModel = Document & UserType
+export type UserModel = UserType & {
+  readonly _id: string,
+}
 
 export const userModelToUserObject = (
   {
-    id,
+    _id,
     name,
     email,
     dateOfBirth,
   }: UserModel
 ): UserObject => ({
-  id,
+  id: _id,
   name,
   email,
   dateOfBirth,

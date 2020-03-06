@@ -1,7 +1,8 @@
 import { APIGatewayProxyResult } from 'aws-lambda'
 import * as E from 'fp-ts/lib/Either'
+import * as A from 'fp-ts/lib/NonEmptyArray'
 import * as TE from 'fp-ts/lib/TaskEither'
-import { Types } from 'mongoose'
+import isMongoId from 'validator/lib/isMongoId'
 
 export enum StatusCodes {
   OK = 200,
@@ -13,10 +14,10 @@ export enum StatusCodes {
 }
 
 export type CustomError = {
-  message: string,
+  message: string | A.NonEmptyArray<string>,
 }
 
-export const isObjectIdValid = (id: string): E.Either<CustomError, string> => Types.ObjectId.isValid(id)
+export const isObjectIdValid = (id: string): E.Either<CustomError, string> => isMongoId(id)
   ? E.right(id)
   : E.left({ message: 'Invalid user ID!' })
 
@@ -29,4 +30,4 @@ export const createResponse = <T>(statusCode: StatusCodes) => (value: T): APIGat
   body: createBody<T>(value),
 })
 
-export const onError = ({ message }: Error): CustomError => ({ message })
+export const toError = ({ message }: Error): CustomError => ({ message })
