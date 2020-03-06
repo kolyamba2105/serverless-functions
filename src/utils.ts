@@ -1,5 +1,6 @@
 import { APIGatewayProxyResult } from 'aws-lambda'
-import { Either, left, right } from 'fp-ts/lib/Either'
+import * as E from 'fp-ts/lib/Either'
+import * as TE from 'fp-ts/lib/TaskEither'
 import { Types } from 'mongoose'
 
 export enum StatusCodes {
@@ -15,9 +16,11 @@ export type CustomError = {
   message: string,
 }
 
-export const isObjectIdValid = (id: string): Either<CustomError, string> => Types.ObjectId.isValid(id)
-  ? right(id)
-  : left({ message: 'Invalid user ID!' })
+export const isObjectIdValid = (id: string): E.Either<CustomError, string> => Types.ObjectId.isValid(id)
+  ? E.right(id)
+  : E.left({ message: 'Invalid user ID!' })
+
+export const validateId = (id: string) => (): TE.TaskEither<CustomError, string> => TE.fromEither(isObjectIdValid(id))
 
 export const createBody = <T>(value: T): string => JSON.stringify(value, null, 2)
 

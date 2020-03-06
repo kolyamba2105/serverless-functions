@@ -1,0 +1,31 @@
+[
+  {
+    "name": "Foo",
+    "email": "foo@mail.com",
+    "dateOfBirth": "1998-04-04"
+  },
+  {
+    "name": "Foo",
+    "email": "foo@mail.com",
+    "dateOfBirth": "1998-04-04T00:00:00.000Z"
+  },
+  {
+    "name": "Foo",
+    "email": "foo@mail.com",
+    "dateOfBirth": "21-05-1998"
+  },
+  {
+    "name": "Bar",
+    "email": "bar@mail.com",
+    "dateOfBirth": 20
+  },
+  {
+    "name": "Baz",
+    "email": "baz@mail.com",
+    "dateOfBirth": "random text"
+  },
+  {
+    "name": "Foo",
+    "dateOfBirth": "1998-04-04T00:00:00.000Z"
+  }
+]

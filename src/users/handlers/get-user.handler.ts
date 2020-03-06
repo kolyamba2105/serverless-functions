@@ -4,13 +4,11 @@ import { pipe } from 'fp-ts/lib/pipeable'
 import * as T from 'fp-ts/lib/Task'
 import * as TE from 'fp-ts/lib/TaskEither'
 import { connectToMongo } from 'mongo-connect'
-import { UserModel, userModelToUserObject, UserObject } from 'users/user.model'
-import UserRepository from 'users/user.repository'
-import { createResponse, CustomError, isObjectIdValid, StatusCodes } from 'utils'
+import { UserModel, userModelToUserObject, UserObject } from 'users/model'
+import { UserRepository } from 'users/repository'
+import { createResponse, CustomError, StatusCodes, validateId } from 'utils'
 
 export const handle: APIGatewayProxyHandler = ({ pathParameters: { id } }: APIGatewayEvent) => {
-  const validateId = (): TE.TaskEither<CustomError, string> => TE.fromEither(isObjectIdValid(id))
-
   const toResponse = (result: O.Option<UserModel>) => pipe(
     result,
     O.map(userModelToUserObject),
@@ -21,7 +19,7 @@ export const handle: APIGatewayProxyHandler = ({ pathParameters: { id } }: APIGa
   )
 
   return pipe(
-    TE.chain<CustomError, unknown, string>(validateId)(connectToMongo),
+    TE.chain<CustomError, unknown, string>(validateId(id))(connectToMongo),
     TE.map<string, T.Task<O.Option<UserModel>>>(UserRepository.findById),
     TE.chain<CustomError, T.Task<O.Option<UserModel>>, O.Option<UserModel>>(TE.rightTask),
     TE.map<O.Option<UserModel>, APIGatewayProxyResult>(toResponse),
