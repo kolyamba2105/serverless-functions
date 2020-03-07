@@ -1,11 +1,23 @@
 import * as E from 'fp-ts/lib/Either'
+import { pipe } from 'fp-ts/lib/pipeable'
 import { readFileSync } from 'fs'
+import { identity } from 'io-ts'
 import { join } from 'path'
-import { CustomError } from 'utils'
+import { CustomError } from 'utils/lambda.utils'
 import { DateOfBirth, validateDateOfBirth } from './date-of-birth.brand'
 import { validateEmail } from './e-mail.brand'
 import { validateName } from './name.brand'
-import { User, validateUser } from './user.validation'
+import { User, ExactUserPayload, validateUser, validateUserPayload } from './user.validation'
+
+const [
+  correctUser,
+  userWithIncorrectDate,
+  userWithMissingProperty,
+  userWithOddProperties,
+  userPayloadWithInvalidDate,
+  userPayloadWithInvalidProperties,
+  userPayloadWithOddProperties,
+] = JSON.parse(readFileSync(join(__dirname, 'users.json')).toString())
 
 describe('User DTO validation', () => {
   describe('Email brand type', () => {
@@ -78,12 +90,6 @@ describe('User DTO validation', () => {
   })
 
   describe('User DTO validation', () => {
-    const [
-      correctUser,
-      userWithIncorrectDate,
-      userWithMissingProperty,
-    ] = JSON.parse(readFileSync(join(__dirname, 'users.json')).toString())
-
     it('should properly decode user from JSON', () => {
       const validationResult: E.Either<CustomError, User> = validateUser(correctUser)
 
@@ -100,6 +106,65 @@ describe('User DTO validation', () => {
       const validationResult: E.Either<CustomError, User> = validateUser(userWithMissingProperty)
 
       expect(E.isLeft(validationResult)).toBeTruthy()
+    })
+
+    it('should only decode properties that are defined on user DTO', () => {
+      const validationResult = pipe(
+        validateUser(userWithOddProperties),
+        E.fold(
+          console.error,
+          identity,
+        )
+      )
+      const expectedResult = {
+        name: 'Buzz',
+        email: 'buzz@light.com',
+        dateOfBirth: new Date('20010-01-12'),
+      }
+
+      expect(validationResult).toStrictEqual(expectedResult)
+    })
+  })
+
+  describe('UserPayload validation', () => {
+    it('should properly decode user payload', () => {
+      const validationResult: E.Either<CustomError, ExactUserPayload> = validateUserPayload(userWithMissingProperty)
+
+      expect(E.isRight(validationResult)).toBeTruthy()
+    })
+
+    it('should not decode user payload when date of birth is invalid', () => {
+      const validationResult: E.Either<CustomError, ExactUserPayload> = validateUserPayload(userPayloadWithInvalidDate)
+
+      expect(E.isLeft(validationResult)).toBeTruthy()
+    })
+
+    it('should ignore invalid properties on user payload', () => {
+      const validationResult = pipe(
+        validateUserPayload(userPayloadWithInvalidProperties),
+        E.fold(
+          console.error,
+          identity,
+        )
+      )
+
+      expect(validationResult).toStrictEqual({ })
+    })
+
+    it('should only decode properties defined on user payload', () => {
+      const validationResult = pipe(
+        validateUserPayload(userPayloadWithOddProperties),
+        E.fold(
+          console.error,
+          identity,
+        )
+      )
+      const expectedResult = {
+        name: 'Foo',
+        dateOfBirth: new Date('1999-01-01'),
+      }
+
+      expect(validationResult).toStrictEqual(expectedResult)
     })
   })
 })

@@ -3,19 +3,13 @@ import * as O from 'fp-ts/lib/Option'
 import { pipe } from 'fp-ts/lib/pipeable'
 import * as T from 'fp-ts/lib/Task'
 import * as TE from 'fp-ts/lib/TaskEither'
-import { connectToDatabase } from 'mongo-connect'
-import { Collection, Db, FilterQuery, InsertOneWriteOpResult, ObjectId } from 'mongodb'
+import { Collection, FilterQuery, InsertOneWriteOpResult, ObjectId } from 'mongodb'
 import { UserModel } from 'users/model'
-import { User as UserDto, UserPayload } from 'users/validation'
+import { ExactUserPayload, User as UserDto } from 'users/validation'
 import { CustomError, toError } from 'utils'
+import { getCollection } from 'utils/mongo.utils'
 
-const toUsersCollection = (db: Db) => db.collection<UserModel>('users')
-
-export const usersCollection: TE.TaskEither<CustomError, Collection<UserModel>> = pipe(
-  connectToDatabase,
-  TE.map(toUsersCollection),
-  TE.mapLeft(toError),
-)
+const usersCollection: TE.TaskEither<CustomError, Collection<UserModel>> = getCollection('users')
 
 export const UserRepository = {
   find: (): TE.TaskEither<CustomError, ReadonlyArray<UserModel>> => {
@@ -63,7 +57,7 @@ export const UserRepository = {
       TE.mapLeft(toError),
     )
   },
-  update: ([id, payload]: [string, UserPayload]) => {
+  update: ([id, payload]: [string, ExactUserPayload]) => {
     const toUpdateOneTask = (
       collection: Collection<UserModel>
     ): TE.TaskEither<CustomError, O.Option<UserModel>> => TE.tryCatch(

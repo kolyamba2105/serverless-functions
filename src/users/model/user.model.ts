@@ -1,26 +1,10 @@
 import { User as UserType } from 'users/validation'
+import { MongoModel } from 'utils'
 
-export type UserObject = {
+export type UserObject = UserType & {
   id: string,
-  name: string,
-  email: string,
-  dateOfBirth: Date,
 }
 
-export type UserModel = UserType & {
-  readonly _id: string,
-}
+export type UserModel = MongoModel & UserType
 
-export const userModelToUserObject = (
-  {
-    _id,
-    name,
-    email,
-    dateOfBirth,
-  }: UserModel
-): UserObject => ({
-  id: _id,
-  name,
-  email,
-  dateOfBirth,
-})
+export const userModelToUserObject = ({ _id, ...rest }: UserModel): UserObject => ({ id: _id, ...rest })

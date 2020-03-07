@@ -1,16 +1,18 @@
 import { pipe } from 'fp-ts/lib/pipeable'
 import * as TE from 'fp-ts/lib/TaskEither'
 import { Collection } from 'mongodb'
-import { UserModel } from 'users/model/user.model'
-import { usersCollection } from 'users/repository/user.repository'
-import { CustomError, toError } from 'utils'
+import { UserModel } from 'users/model'
+import { CustomError, getCollection, MongoModel, toError } from 'utils'
 
-const createIndex = <Type>(collection: TE.TaskEither<CustomError, Collection<Type>>) => (
+const createIndex = <Model extends MongoModel>(collection: TE.TaskEither<CustomError, Collection<Model>>) => (
   field: string
 ): TE.TaskEither<CustomError, any> => pipe(
   collection,
-  TE.map((c: Collection<Type>): TE.TaskEither<CustomError, any> => TE.tryCatch(() => c.createIndex(field), toError)),
+  TE.map((c: Collection<Model>): TE.TaskEither<CustomError, any> => TE.tryCatch(() => c.createIndex(field), toError)),
+  TE.mapLeft(toError),
 )
 
 // it just doesnt' work...
-createIndex<UserModel>(usersCollection)('email')().then(console.log)
+const collection = getCollection<UserModel>('users')
+
+createIndex(collection)('email')().then(console.log)

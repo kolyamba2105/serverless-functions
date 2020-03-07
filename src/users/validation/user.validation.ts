@@ -26,7 +26,9 @@ const UserPayload = t.partial({
   dateOfBirth: withMessage(DateOfBirth, () => 'Date of birth is invalid or is not provided!'),
 })
 
-export type UserPayload = t.TypeOf<typeof UserPayload>
+const ExactUserPayload = t.exact(UserPayload)
+
+export type ExactUserPayload = t.TypeOf<typeof ExactUserPayload>
 
 const toUser = ([name, email, dateOfBirth]: [string, string, Date]): User => ({
   name,
@@ -52,7 +54,7 @@ const toPayloadValidationError = (errors: t.Errors): CustomError => ({
   message: A.map((error: t.ValidationError) => error.message)(errors),
 })
 
-export const validateUserPayload = (userPayload: unknown): E.Either<CustomError, UserPayload> => pipe(
-  UserPayload.decode(userPayload),
+export const validateUserPayload = (userPayload: unknown): E.Either<CustomError, ExactUserPayload> => pipe(
+  ExactUserPayload.decode(userPayload),
   E.mapLeft(toPayloadValidationError),
 )

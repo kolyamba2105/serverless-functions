@@ -7,11 +7,11 @@ import * as T from 'fp-ts/lib/Task'
 import * as TE from 'fp-ts/lib/TaskEither'
 import { UserModel } from 'users/model'
 import { UserRepository } from 'users/repository'
-import { UserPayload, validateUserPayload } from 'users/validation'
+import { ExactUserPayload, validateUserPayload } from 'users/validation'
 import { createResponse, CustomError, StatusCodes, toError, validateId } from 'utils'
 
 export const handle: APIGatewayProxyHandler = ({ pathParameters: { id }, body }: APIGatewayEvent) => {
-  const validateBody = (body: string | null): TE.TaskEither<CustomError, UserPayload> => pipe(
+  const validateBody = (body: string | null): TE.TaskEither<CustomError, ExactUserPayload> => pipe(
     body,
     E.fromNullable<CustomError>({ message: 'Body is not provided!' }),
     E.chain((body: NonNullable<string>) => E.parseJSON<CustomError>(body, toError)),

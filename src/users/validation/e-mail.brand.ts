@@ -1,6 +1,6 @@
+import * as E from 'fp-ts/lib/Either'
 import { pipe } from 'fp-ts/lib/pipeable'
 import * as t from 'io-ts'
-import * as E from 'fp-ts/lib/Either'
 import { liftValidation } from 'users/validation/helpers'
 import { CustomError } from 'utils'
 import isEmailValidator from 'validator/lib/isEmail'

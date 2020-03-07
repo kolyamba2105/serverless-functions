@@ -12,5 +12,25 @@
   {
     "name": "Foo",
     "dateOfBirth": "1998-04-04T00:00:00.000Z"
+  },
+  {
+    "name": "Buzz",
+    "email": "buzz@light.com",
+    "fullName": "Buzz Light",
+    "dateOfBirth": "20010-01-12",
+    "dateOfDeath": "2008-08-01"
+  },
+  {
+    "dateOfBirth": "Invalid Date"
+  },
+  {
+    "fullName": "Foo Bar",
+    "dateOfDeath": "2020-02-29T00:00:00.000Z"
+  },
+  {
+    "name": "Foo",
+    "fullName": "Foo Bar",
+    "dateOfBirth": "1999-01-01",
+    "dateOfDeath": "2020-02-29T00:00:00.000Z"
   }
 ]
