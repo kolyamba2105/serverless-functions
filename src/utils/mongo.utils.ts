@@ -16,6 +16,8 @@ export const establishConnection = (
     user,
     password,
   }: AuthCredentials
+) => (
+  authSource?: string
 ): T.Task<MongoClient> => () => connect(uri, {
   auth: {
     user,
@@ -23,16 +25,25 @@ export const establishConnection = (
   },
   useNewUrlParser: true,
   useUnifiedTopology: true,
+  authSource,
 })
 
-const connectToDatabase = (uri: string) => (credentials: AuthCredentials): TE.TaskEither<CustomError, Db> => pipe(
-  TE.tryCatch(establishConnection(uri)(credentials), toError),
-  TE.map((mongoClient: MongoClient) => mongoClient.db()),
+const connectToDatabase = (
+  uri: string
+) => (
+  credentials: AuthCredentials
+) => (
+  authSource?: string
+) => (
+  dbName: string
+): TE.TaskEither<CustomError, Db> => pipe(
+  TE.tryCatch(establishConnection(uri)(credentials)(authSource), toError),
+  TE.map((mongoClient: MongoClient) => mongoClient.db(dbName)),
 )
 
-const { mongo: { uri, user, password } } = credentials
+const { mongo: { uri, database, user, password } } = credentials
 
-const dbConnection = connectToDatabase(uri)({ user, password })
+const dbConnection = connectToDatabase(uri)({ user, password })(database)(database)
 
 export type MongoModel = Readonly<{ _id: string }>
 
