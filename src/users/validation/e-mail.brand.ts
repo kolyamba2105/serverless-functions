@@ -17,9 +17,10 @@ export const Email = t.brand(
 
 export type Email = t.TypeOf<typeof Email>
 
-export const validateEmail = (email: unknown): E.Either<CustomError, string> => pipe(
-  Email.decode(email),
-  E.mapLeft(() => ({ message: 'E-mail is invalid or is not provided!' })),
-)
+export const validateEmail = (email: unknown): E.Either<CustomError, string> =>
+  pipe(
+    Email.decode(email),
+    E.mapLeft(() => ({ message: 'E-mail is invalid or is not provided!' })),
+  )
 
 export const validateEmailLifted = liftValidation<CustomError, string>(validateEmail)

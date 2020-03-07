@@ -40,21 +40,23 @@ const toValidationError = (errors: NEA.NonEmptyArray<CustomError>): CustomError 
   message: NEA.map((e: CustomError) => (e.message as string))(errors),
 })
 
-export const validateUser = ({ name, email, dateOfBirth }: any): E.Either<CustomError, User> => pipe(
-  sequenceT(applicativeValidation)(
-    validateNameLifted(name),
-    validateEmailLifted(email),
-    validateDateOfBirthLifted(dateOfBirth),
-  ),
-  E.map(toUser),
-  E.mapLeft(toValidationError),
-)
+export const validateUser = ({ name, email, dateOfBirth }: any): E.Either<CustomError, User> =>
+  pipe(
+    sequenceT(applicativeValidation)(
+      validateNameLifted(name),
+      validateEmailLifted(email),
+      validateDateOfBirthLifted(dateOfBirth),
+    ),
+    E.map(toUser),
+    E.mapLeft(toValidationError),
+  )
 
 const toPayloadValidationError = (errors: t.Errors): CustomError => ({
   message: A.map((error: t.ValidationError) => error.message)(errors),
 })
 
-export const validateUserPayload = (userPayload: unknown): E.Either<CustomError, ExactUserPayload> => pipe(
-  ExactUserPayload.decode(userPayload),
-  E.mapLeft(toPayloadValidationError),
-)
+export const validateUserPayload = (userPayload: unknown): E.Either<CustomError, ExactUserPayload> =>
+  pipe(
+    ExactUserPayload.decode(userPayload),
+    E.mapLeft(toPayloadValidationError),
+  )

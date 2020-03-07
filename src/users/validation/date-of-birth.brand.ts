@@ -10,9 +10,10 @@ export const DateOfBirth = DateFromISOString
 
 export type DateOfBirth = t.TypeOf<typeof DateOfBirth>
 
-export const validateDateOfBirth = (dateOfBirth: unknown): E.Either<CustomError, Date> => pipe(
-  DateFromISOString.decode(dateOfBirth),
-  E.mapLeft(() => ({ message: 'Date of birth is invalid or is not provided!' }))
-)
+export const validateDateOfBirth = (dateOfBirth: unknown): E.Either<CustomError, Date> =>
+  pipe(
+    DateFromISOString.decode(dateOfBirth),
+    E.mapLeft(() => ({ message: 'Date of birth is invalid or is not provided!' }))
+  )
 
 export const validateDateOfBirthLifted = liftValidation<CustomError, Date>(validateDateOfBirth)
