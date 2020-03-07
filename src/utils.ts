@@ -1,6 +1,6 @@
 import { APIGatewayProxyResult } from 'aws-lambda'
 import * as E from 'fp-ts/lib/Either'
-import * as A from 'fp-ts/lib/NonEmptyArray'
+import * as NEA from 'fp-ts/lib/NonEmptyArray'
 import * as TE from 'fp-ts/lib/TaskEither'
 import isMongoId from 'validator/lib/isMongoId'
 
@@ -14,7 +14,7 @@ export enum StatusCodes {
 }
 
 export type CustomError = {
-  message: string | A.NonEmptyArray<string>,
+  message: string | Array<string> | NEA.NonEmptyArray<string>,
 }
 
 export const isObjectIdValid = (id: string): E.Either<CustomError, string> => isMongoId(id)

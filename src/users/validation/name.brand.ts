@@ -25,7 +25,9 @@ export type Name = t.TypeOf<typeof Name>
 
 export const validateName = (name: unknown): E.Either<CustomError, string> => pipe(
   Name.decode(name),
-  E.mapLeft(() => ({ message: 'User name is invalid or is not provided! User name must contain at least one capital letter and be at least 3 characters long!' }))
+  E.mapLeft(() => ({
+    message: 'User name is invalid or is not provided! User name must contain at least one capital letter and be at least 3 characters long!'
+  }))
 )
 
 export const validateNameLifted = liftValidation<CustomError, string>(validateName)

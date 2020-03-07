@@ -54,3 +54,10 @@ functions:
       - http:
           method: post
           path: users
+
+  updateUser:
+    handler: src/users/handlers/update-user.handler.handle
+    events:
+      - http:
+          method: patch
+          path: users/{id}

@@ -6,7 +6,7 @@ import * as TE from 'fp-ts/lib/TaskEither'
 import { connectToDatabase } from 'mongo-connect'
 import { Collection, Db, FilterQuery, InsertOneWriteOpResult, ObjectId } from 'mongodb'
 import { UserModel } from 'users/model'
-import { User as UserDto } from 'users/validation'
+import { User as UserDto, UserPayload } from 'users/validation'
 import { CustomError, toError } from 'utils'
 
 const toUsersCollection = (db: Db) => db.collection<UserModel>('users')
@@ -60,6 +60,22 @@ export const UserRepository = {
       usersCollection,
       TE.map(toInsertOneTask),
       TE.chain(TE.rightTask),
+      TE.mapLeft(toError),
+    )
+  },
+  update: ([id, payload]: [string, UserPayload]) => {
+    const toUpdateOneTask = (
+      collection: Collection<UserModel>
+    ): TE.TaskEither<CustomError, O.Option<UserModel>> => TE.tryCatch(
+      () => collection
+        .findOneAndUpdate({ _id: new ObjectId(id) } as FilterQuery<UserModel>, { $set: { ...payload } })
+        .then(({ value }) => O.fromNullable(value)),
+      toError,
+    )
+
+    return pipe(
+      usersCollection,
+      TE.chain(toUpdateOneTask),
       TE.mapLeft(toError),
     )
   },
