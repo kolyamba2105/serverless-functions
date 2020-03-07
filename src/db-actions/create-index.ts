@@ -1,7 +1,7 @@
 import { pipe } from 'fp-ts/lib/pipeable'
 import * as T from 'fp-ts/lib/Task'
 import * as TE from 'fp-ts/lib/TaskEither'
-import { Collection } from 'mongodb'
+import { Collection, IndexOptions } from 'mongodb'
 import { UserModel } from 'users/model'
 import { CustomError, getCollection, MongoModel, toError } from 'utils'
 
@@ -9,11 +9,13 @@ const createIndex = <Model extends MongoModel>(
   collection: TE.TaskEither<CustomError, Collection<Model>>
 ) => (
   field: string
+) => (
+  indexOptions: IndexOptions
 ): T.Task<string> => {
   const toCreateIndexTaskEither = (
     collection: Collection<Model>
   ): TE.TaskEither<CustomError, string> => TE.tryCatch(
-    () => collection.createIndex(field),
+    () => collection.createIndex(field, indexOptions),
     toError
   )
 
@@ -27,4 +29,4 @@ const createIndex = <Model extends MongoModel>(
 
 const collection = getCollection<UserModel>('users')
 
-createIndex(collection)('email')().then(console.log)
+createIndex(collection)('email')({ unique: true })().then(console.log)

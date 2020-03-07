@@ -8,6 +8,6 @@
   "watch": [
     "./src"
   ],
-  "exec": "NODE_PATH=./src ts-node ./src/create-index.ts",
+  "exec": "NODE_PATH=./src ts-node ./src/db-actions/create-index.ts",
   "ext": "ts"
 }
