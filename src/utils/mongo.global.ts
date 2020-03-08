@@ -11,4 +11,4 @@ const isObjectIdValid = (id: string): E.Either<CustomError, string> => isMongoId
   ? E.right(id)
   : E.left({ message: 'Invalid user ID!' })
 
-export const validateId = (id: string) => (): TE.TaskEither<CustomError, string> => TE.fromEither(isObjectIdValid(id))
+export const validateId = (id: string): TE.TaskEither<CustomError, string> => TE.fromEither(isObjectIdValid(id))

@@ -18,7 +18,7 @@ export const handle: APIGatewayProxyHandler = ({ pathParameters: { id } }: APIGa
     )
 
   return pipe(
-    validateId(id)(),
+    validateId(id),
     TE.chain(UserRepository.findByIdAndDelete),
     TE.map(toResponse),
     TE.mapLeft(createResponse<CustomError>(StatusCodes.BadRequest)),

@@ -20,7 +20,7 @@ export const handle: APIGatewayProxyHandler = ({ pathParameters: { id }, body }:
     )
 
   return pipe(
-    sequenceT(TE.taskEither)(validateId(id)(), validateBody<ExactUserPayload>(validateUserPayload)(body)),
+    sequenceT(TE.taskEither)(validateId(id), validateBody<ExactUserPayload>(validateUserPayload)(body)),
     TE.chain(UserRepository.update),
     TE.map(toResponse),
     TE.mapLeft(createResponse<CustomError>(StatusCodes.BadRequest)),
