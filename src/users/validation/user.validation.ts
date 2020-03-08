@@ -40,6 +40,8 @@ const toValidationError = (errors: NEA.NonEmptyArray<CustomError>): CustomError 
   message: NEA.map((e: CustomError) => (e.message as string))(errors),
 })
 
+// TODO change type to unknown...
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const validateUser = ({ name, email, dateOfBirth }: any): E.Either<CustomError, User> =>
   pipe(
     sequenceT(applicativeValidation)(

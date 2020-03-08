@@ -39,6 +39,8 @@ export const insertOne = <M>(
   collection: Collection<MongoModel<M>>
 ): TE.TaskEither<CustomError, InsertionResult> =>
   TE.tryCatch(
+    // TODO fix types here
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     () => collection.insertOne(dto as any).then(({ insertedId: id }) => ({ id })),
     toError,
   )

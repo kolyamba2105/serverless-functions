@@ -9,9 +9,10 @@ import { UserRepository } from 'users/repository'
 import { createResponse, CustomError, StatusCodes } from 'utils'
 
 export const handle: APIGatewayProxyHandler = () => {
-  const toUsersMap = (users: ReadonlyArray<UserObject>) => Map<string, UserObject>(
-    Array.map((user: UserObject): [string, UserObject] => [user.id, user])(users)
-  )
+  const toUsersMap = (users: ReadonlyArray<UserObject>): Map<string, UserObject> =>
+    Map<string, UserObject>(
+      Array.map((user: UserObject): [string, UserObject] => [user.id, user])(users)
+    )
 
   return pipe(
     UserRepository.find(),

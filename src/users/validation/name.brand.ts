@@ -9,11 +9,11 @@ type NameBrand = {
   readonly Name: unique symbol,
 }
 
-const oneCapitalLetter = (s: string) => /[A-Z]/g.test(s)
+const oneCapitalLetter = (s: string): boolean => /[A-Z]/g.test(s)
 
 type LengthValidatorOptions = Readonly<{ min?: number, max?: number }>
 
-const length = (s: string) => ({ min, max }: LengthValidatorOptions) => lengthValidator(s, { min, max })
+const length = (s: string) => ({ min, max }: LengthValidatorOptions): boolean => lengthValidator(s, { min, max })
 
 export const Name = t.brand(
   t.string,

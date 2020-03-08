@@ -8,6 +8,7 @@
     "start": "sls offline start",
     "mongo:create-index": "nodemon",
     "test": "jest",
+    "lint": "eslint . --ext .ts",
     "deploy:dev": "sls deploy",
     "deploy:test": "sls deploy --stage test"
   },
@@ -29,6 +30,9 @@
     "@types/mongodb": "3.5.2",
     "@types/node": "13.9.0",
     "@types/validator": "12.0.1",
+    "@typescript-eslint/eslint-plugin": "2.22.0",
+    "@typescript-eslint/parser": "2.22.0",
+    "eslint": "6.8.0",
     "fork-ts-checker-webpack-plugin": "4.0.5",
     "jest": "25.1.0",
     "nodemon": "2.0.2",

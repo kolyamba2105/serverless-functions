@@ -14,7 +14,7 @@ export enum StatusCodes {
 }
 
 export type CustomError = {
-  message: string | Array<string> | NEA.NonEmptyArray<string>,
+  readonly message: string | Array<string> | NEA.NonEmptyArray<string>,
 }
 
 export const createBody = <T>(value: T): string => JSON.stringify(value, null, 2)

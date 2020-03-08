@@ -5,7 +5,10 @@ import * as TE from 'fp-ts/lib/TaskEither'
 import { connect, Db, MongoClient } from 'mongodb'
 import { CustomError, toError } from 'utils/aws.lambda'
 
-type AuthCredentials = Readonly<{ user: string, password: string }>
+type AuthCredentials = Readonly<{
+  user: string,
+  password: string,
+}>
 
 export const establishConnection = (
   uri: string
@@ -16,8 +19,8 @@ export const establishConnection = (
   }: AuthCredentials
 ) => (
   authSource?: string
-): T.Task<MongoClient> =>
-  () => connect(uri, {
+): T.Task<MongoClient> => (): Promise<MongoClient> =>
+  connect(uri, {
       auth: {
         user,
         password,

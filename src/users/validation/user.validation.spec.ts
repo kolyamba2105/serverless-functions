@@ -7,7 +7,7 @@ import { CustomError } from 'utils/aws.lambda'
 import { DateOfBirth, validateDateOfBirth } from './date-of-birth.brand'
 import { validateEmail } from './e-mail.brand'
 import { validateName } from './name.brand'
-import { User, ExactUserPayload, validateUser, validateUserPayload } from './user.validation'
+import { ExactUserPayload, User, validateUser, validateUserPayload } from './user.validation'
 
 const [
   correctUser,
@@ -22,14 +22,14 @@ const [
 describe('User DTO validation', () => {
   describe('Email brand type', () => {
     it('should properly decode an e-mail', () => {
-      const email: string = 'foo@bar.com'
+      const email = 'foo@bar.com'
       const validationResult: E.Either<CustomError, string> = validateEmail(email)
 
       expect(E.isRight(validationResult)).toBeTruthy()
     })
 
     it('should not decode an invalid e-mail', () => {
-      const email: string = 'bla-bla-bla'
+      const email = 'bla-bla-bla'
       const validationResult: E.Either<CustomError, string> = validateEmail(email)
 
       expect(E.isLeft(validationResult)).toBeTruthy()
@@ -38,21 +38,21 @@ describe('User DTO validation', () => {
 
   describe('Name brand type', () => {
     it('should properly decode user name', () => {
-      const name: string = 'Foo'
+      const name = 'Foo'
       const validationResult: E.Either<CustomError, string> = validateName(name)
 
       expect(E.isRight(validationResult)).toBeTruthy()
     })
 
     it('should not decode user name when it does not contain at least one capital letter', () => {
-      const name: string = 'mike'
+      const name = 'mike'
       const validationResult: E.Either<CustomError, string> = validateName(name)
 
       expect(E.isLeft(validationResult)).toBeTruthy()
     })
 
     it('should not decode user name when it is shorter then 3 chars', () => {
-      const name: string = 'CJ'
+      const name = 'CJ'
       const validationResult: E.Either<CustomError, string> = validateName(name)
 
       expect(E.isLeft(validationResult)).toBeTruthy()
@@ -61,28 +61,28 @@ describe('User DTO validation', () => {
 
   describe('DateOfBirth brand type', () => {
     it('should properly decode date of birth', () => {
-      const dateOfBirth: string = '1998-04-04'
+      const dateOfBirth = '1998-04-04'
       const validationResult: E.Either<CustomError, DateOfBirth> = validateDateOfBirth(dateOfBirth)
 
       expect(E.isRight(validationResult)).toBeTruthy()
     })
 
     it('should properly decode date of birth when it is a proper ISOString', () => {
-      const dateOfBirth: string = '1998-04-04T00:00:00.000Z'
+      const dateOfBirth = '1998-04-04T00:00:00.000Z'
       const validationResult: E.Either<CustomError, DateOfBirth> = validateDateOfBirth(dateOfBirth)
 
       expect(E.isRight(validationResult)).toBeTruthy()
     })
 
     it('should not decode date of birth when it is a random string', () => {
-      const dateOfBirth: string = 'bla-bla-bla'
+      const dateOfBirth = 'bla-bla-bla'
       const validationResult: E.Either<CustomError, DateOfBirth> = validateDateOfBirth(dateOfBirth)
 
       expect(E.isLeft(validationResult)).toBeTruthy()
     })
 
     it('should not decode date of birth when it is a number', () => {
-      const dateOfBirth: number = 2000
+      const dateOfBirth = 2000
       const validationResult: E.Either<CustomError, DateOfBirth> = validateDateOfBirth(dateOfBirth)
 
       expect(E.isLeft(validationResult)).toBeTruthy()
