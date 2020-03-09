@@ -1,13 +1,12 @@
+import { validateEmail } from 'api/users/validation/e-mail.validation'
+import { UserPayload, validateUserPayload } from 'api/users/validation/user-payload.validation'
 import * as E from 'fp-ts/lib/Either'
 import { pipe } from 'fp-ts/lib/pipeable'
 import { readFileSync } from 'fs'
 import { identity } from 'io-ts'
 import { join } from 'path'
 import { CustomError } from 'utils/aws.lambda'
-import { DateOfBirth, validateDateOfBirth } from './date-of-birth.brand'
-import { validateEmail } from './e-mail.brand'
-import { validateName } from './name.brand'
-import { User, UserPayload, validateUser, validateUserPayload } from './user.validation'
+import { User, validateUser } from './user.validation'
 
 const [
   correctUser,
@@ -31,59 +30,6 @@ describe('User DTO validation', () => {
     it('should not decode an invalid e-mail', () => {
       const email = 'bla-bla-bla'
       const validationResult: E.Either<CustomError, string> = validateEmail(email)
-
-      expect(E.isLeft(validationResult)).toBeTruthy()
-    })
-  })
-
-  describe('Name brand type', () => {
-    it('should properly decode user name', () => {
-      const name = 'Foo'
-      const validationResult: E.Either<CustomError, string> = validateName(name)
-
-      expect(E.isRight(validationResult)).toBeTruthy()
-    })
-
-    it('should not decode user name when it does not contain at least one capital letter', () => {
-      const name = 'mike'
-      const validationResult: E.Either<CustomError, string> = validateName(name)
-
-      expect(E.isLeft(validationResult)).toBeTruthy()
-    })
-
-    it('should not decode user name when it is shorter then 3 chars', () => {
-      const name = 'CJ'
-      const validationResult: E.Either<CustomError, string> = validateName(name)
-
-      expect(E.isLeft(validationResult)).toBeTruthy()
-    })
-  })
-
-  describe('DateOfBirth brand type', () => {
-    it('should properly decode date of birth', () => {
-      const dateOfBirth = '1998-04-04'
-      const validationResult: E.Either<CustomError, DateOfBirth> = validateDateOfBirth(dateOfBirth)
-
-      expect(E.isRight(validationResult)).toBeTruthy()
-    })
-
-    it('should properly decode date of birth when it is a proper ISOString', () => {
-      const dateOfBirth = '1998-04-04T00:00:00.000Z'
-      const validationResult: E.Either<CustomError, DateOfBirth> = validateDateOfBirth(dateOfBirth)
-
-      expect(E.isRight(validationResult)).toBeTruthy()
-    })
-
-    it('should not decode date of birth when it is a random string', () => {
-      const dateOfBirth = 'bla-bla-bla'
-      const validationResult: E.Either<CustomError, DateOfBirth> = validateDateOfBirth(dateOfBirth)
-
-      expect(E.isLeft(validationResult)).toBeTruthy()
-    })
-
-    it('should not decode date of birth when it is a number', () => {
-      const dateOfBirth = 2000
-      const validationResult: E.Either<CustomError, DateOfBirth> = validateDateOfBirth(dateOfBirth)
 
       expect(E.isLeft(validationResult)).toBeTruthy()
     })
@@ -148,7 +94,7 @@ describe('User DTO validation', () => {
         )
       )
 
-      expect(validationResult).toStrictEqual({ })
+      expect(validationResult).toStrictEqual({})
     })
 
     it('should only decode properties defined on user payload', () => {

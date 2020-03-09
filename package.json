@@ -6,6 +6,7 @@
   "main": "handler.js",
   "scripts": {
     "start": "sls offline start",
+    "start:debug": "SLS_DEBUG=* sls offline start",
     "mongo:create-index": "nodemon",
     "test": "jest",
     "lint": "eslint . --ext .ts",

@@ -1,12 +1,15 @@
-const path = require('path');
-const serverlessWebpack = require('serverless-webpack');
-const nodeExternals = require('webpack-node-externals');
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const path = require('path')
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const serverlessWebpack = require('serverless-webpack')
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const nodeExternals = require('webpack-node-externals')
 
 module.exports = {
   context: __dirname,
   mode: serverlessWebpack.lib.webpack.isLocal ? 'development' : 'production',
   entry: serverlessWebpack.lib.entries,
-  devtool: serverlessWebpack.lib.webpack.isLocal ? 'cheap-module-eval-source-map' : 'source-map',
+  devtool: 'source-map',
   resolve: {
     extensions: ['.mjs', '.json', '.ts'],
     symlinks: false,
@@ -16,6 +19,7 @@ module.exports = {
       path.resolve(__dirname, 'src'),
     ],
   },
+  stats: 'minimal',
   output: {
     libraryTarget: 'commonjs',
     path: path.join(__dirname, '.webpack'),
@@ -43,4 +47,4 @@ module.exports = {
     ],
   },
   plugins: [],
-};
+}
