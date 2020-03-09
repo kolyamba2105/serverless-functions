@@ -1,8 +1,8 @@
+import { User } from 'api/users/validation'
 import { pipe } from 'fp-ts/lib/pipeable'
 import * as T from 'fp-ts/lib/Task'
 import * as TE from 'fp-ts/lib/TaskEither'
 import { Collection, IndexOptions } from 'mongodb'
-import { User } from 'users/validation'
 import { CustomError, getCollection, MongoModel, toError } from 'utils'
 
 const createIndex = <M>(

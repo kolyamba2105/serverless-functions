@@ -7,7 +7,7 @@ import { CustomError } from 'utils/aws.lambda'
 import { DateOfBirth, validateDateOfBirth } from './date-of-birth.brand'
 import { validateEmail } from './e-mail.brand'
 import { validateName } from './name.brand'
-import { ExactUserPayload, User, validateUser, validateUserPayload } from './user.validation'
+import { User, UserPayload, validateUser, validateUserPayload } from './user.validation'
 
 const [
   correctUser,
@@ -128,13 +128,13 @@ describe('User DTO validation', () => {
 
   describe('UserPayload validation', () => {
     it('should properly decode user payload', () => {
-      const validationResult: E.Either<CustomError, ExactUserPayload> = validateUserPayload(userWithMissingProperty)
+      const validationResult: E.Either<CustomError, UserPayload> = validateUserPayload(userWithMissingProperty)
 
       expect(E.isRight(validationResult)).toBeTruthy()
     })
 
     it('should not decode user payload when date of birth is invalid', () => {
-      const validationResult: E.Either<CustomError, ExactUserPayload> = validateUserPayload(userPayloadWithInvalidDate)
+      const validationResult: E.Either<CustomError, UserPayload> = validateUserPayload(userPayloadWithInvalidDate)
 
       expect(E.isLeft(validationResult)).toBeTruthy()
     })

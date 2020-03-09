@@ -1,11 +1,11 @@
+import { userModelToUserObject, UserObject } from 'api/users/model'
+import { UserRepository } from 'api/users/repository'
 import { APIGatewayProxyHandler } from 'aws-lambda'
 import { pipe } from 'fp-ts/lib/pipeable'
 import * as Array from 'fp-ts/lib/ReadonlyArray'
 import * as T from 'fp-ts/lib/Task'
 import * as TE from 'fp-ts/lib/TaskEither'
 import { Map } from 'immutable'
-import { userModelToUserObject, UserObject } from 'users/model'
-import { UserRepository } from 'users/repository'
 import { createResponse, CustomError, StatusCodes } from 'utils'
 
 export const handle: APIGatewayProxyHandler = () => {

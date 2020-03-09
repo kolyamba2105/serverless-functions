@@ -1,9 +1,9 @@
+import { UserModel } from 'api/users/model'
+import { User, UserPayload } from 'api/users/validation'
 import * as O from 'fp-ts/lib/Option'
 import { pipe } from 'fp-ts/lib/pipeable'
 import * as TE from 'fp-ts/lib/TaskEither'
 import { Collection } from 'mongodb'
-import { UserModel } from 'users/model'
-import { ExactUserPayload, User } from 'users/validation'
 import {
   CustomError,
   find,
@@ -37,7 +37,7 @@ export const UserRepository = {
       TE.chain(insertOne<User>(dto)),
       TE.mapLeft(toError),
     ),
-  update: ([id, payload]: [string, ExactUserPayload]): TE.TaskEither<CustomError, O.Option<UserModel>> =>
+  update: ([id, payload]: [string, UserPayload]): TE.TaskEither<CustomError, O.Option<UserModel>> =>
     pipe(
       usersCollection,
       TE.chain(findOneAndUpdate([id, payload])),

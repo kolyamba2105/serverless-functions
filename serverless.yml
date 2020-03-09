@@ -29,37 +29,4 @@ provider:
       ${env:MONGO_PASSWORD, file(./env.yml):MONGO_PASSWORD}
 
 functions:
-  getUsers:
-    handler: src/users/handlers/get-users.handler.handle
-    events:
-      - http:
-          method: get
-          path: users
-
-  getUser:
-    handler: src/users/handlers/get-user.handler.handle
-    events:
-      - http:
-          method: get
-          path: users/{id}
-
-  deleteUser:
-    handler: src/users/handlers/delete-user.handler.handle
-    events:
-      - http:
-          method: delete
-          path: users/{id}
-
-  createUser:
-    handler: src/users/handlers/create-user.handler.handle
-    events:
-      - http:
-          method: post
-          path: users
-
-  updateUser:
-    handler: src/users/handlers/update-user.handler.handle
-    events:
-      - http:
-          method: patch
-          path: users/{id}
+  - ${file(src/api/users/handlers.yml)}

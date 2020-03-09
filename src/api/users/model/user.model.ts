@@ -1,4 +1,4 @@
-import { User } from 'users/validation'
+import { User } from 'api/users/validation'
 import { MongoModel, ObjectType } from 'utils'
 
 export type UserObject = ObjectType<User>

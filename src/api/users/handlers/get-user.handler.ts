@@ -1,10 +1,10 @@
+import { UserModel, userModelToUserObject, UserObject } from 'api/users/model'
+import { UserRepository } from 'api/users/repository'
 import { APIGatewayEvent, APIGatewayProxyHandler, APIGatewayProxyResult } from 'aws-lambda'
 import * as O from 'fp-ts/lib/Option'
 import { pipe } from 'fp-ts/lib/pipeable'
 import * as T from 'fp-ts/lib/Task'
 import * as TE from 'fp-ts/lib/TaskEither'
-import { UserModel, userModelToUserObject, UserObject } from 'users/model'
-import { UserRepository } from 'users/repository'
 import { createResponse, CustomError, StatusCodes, validateId } from 'utils'
 
 export const handle: APIGatewayProxyHandler = ({ pathParameters: { id } }: APIGatewayEvent) => {

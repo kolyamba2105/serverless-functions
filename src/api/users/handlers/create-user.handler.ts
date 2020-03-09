@@ -1,9 +1,9 @@
+import { UserRepository } from 'api/users/repository'
+import { User, validateUser } from 'api/users/validation'
 import { APIGatewayEvent, APIGatewayProxyHandler } from 'aws-lambda'
 import { pipe } from 'fp-ts/lib/pipeable'
 import * as T from 'fp-ts/lib/Task'
 import * as TE from 'fp-ts/lib/TaskEither'
-import { UserRepository } from 'users/repository'
-import { User, validateUser } from 'users/validation'
 import { createResponse, CustomError, InsertionResult, StatusCodes, validateBody } from 'utils'
 
 export const handle: APIGatewayProxyHandler = ({ body }: APIGatewayEvent) =>

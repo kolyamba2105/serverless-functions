@@ -1,9 +1,9 @@
+import { liftValidation } from 'api/users/validation/helpers'
 import * as E from 'fp-ts/lib/Either'
 import { pipe } from 'fp-ts/lib/pipeable'
 import * as t from 'io-ts'
-import { liftValidation } from 'users/validation/helpers'
 import { CustomError } from 'utils'
-import isEmailValidator from 'validator/lib/isEmail'
+import isEmail from 'validator/lib/isEmail'
 
 type EmailBrand = {
   readonly Email: unique symbol,
@@ -11,15 +11,19 @@ type EmailBrand = {
 
 export const Email = t.brand(
   t.string,
-  (s: string): s is t.Branded<string, EmailBrand> => isEmailValidator(s),
+  (s: string): s is t.Branded<string, EmailBrand> => isEmail(s),
   'Email',
 )
 
 export type Email = t.TypeOf<typeof Email>
 
-export const validateEmail = (email: unknown): E.Either<CustomError, string> =>
+const emailValidator = (s: string): E.Either<CustomError, string> => isEmail(s)
+  ? E.right(s)
+  : E.left({ message: 'E-mail is not valid!' })
+
+export const validateEmail = (email: string): E.Either<CustomError, string> =>
   pipe(
-    Email.decode(email),
+    emailValidator(email),
     E.mapLeft(() => ({ message: 'E-mail is invalid or is not provided!' })),
   )
 

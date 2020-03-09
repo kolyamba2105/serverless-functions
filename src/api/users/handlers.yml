@@ -1,0 +1,34 @@
+getUsers:
+  handler: src/api/users/handlers/get-users.handler.handle
+  events:
+    - http:
+        method: get
+        path: users
+
+getUser:
+  handler: src/api/users/handlers/get-user.handler.handle
+  events:
+    - http:
+        method: get
+        path: users/{id}
+
+deleteUser:
+  handler: src/api/users/handlers/delete-user.handler.handle
+  events:
+    - http:
+        method: delete
+        path: users/{id}
+
+createUser:
+  handler: src/api/users/handlers/create-user.handler.handle
+  events:
+    - http:
+        method: post
+        path: users
+
+updateUser:
+  handler: src/api/users/handlers/update-user.handler.handle
+  events:
+    - http:
+        method: patch
+        path: users/{id}
