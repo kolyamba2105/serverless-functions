@@ -23,7 +23,7 @@
     "monocle-ts": "2.1.0",
     "newtype-ts": "0.3.4",
     "source-map-support": "0.5.16",
-    "validator": "12.2.0"
+    "validator": "13.7.0"
   },
   "devDependencies": {
     "@types/aws-lambda": "8.10.46",
